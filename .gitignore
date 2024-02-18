@@ -17,6 +17,9 @@
 # Ignore .idea directory
 .idea
 
+# Do not push .env
+.env
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
