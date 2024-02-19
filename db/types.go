@@ -15,7 +15,6 @@ type User struct {
 }
 
 type Message struct {
-	AuthorId    int
-	Content     string
-	OrderNumber int
+	Author  string `json:"role"`
+	Content string `json:"content"`
 }

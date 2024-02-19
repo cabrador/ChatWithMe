@@ -1,31 +1,64 @@
 package ai
 
 import (
+	"bytes"
+	"chatwithme/db"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 )
 
-func MakeChatGenerator() {}
+const (
+	openAiApiUrl = "https://api.openai.com/v1/chat/completions"
+)
+
+func MakeChatGenerator() ChatGenerator {
+	return &chatGenerator{
+		client: http.DefaultClient,
+		apiKey: os.Getenv("OPENAI_API_TOKEN"),
+	}
+}
 
 type ChatGenerator interface {
-	Generate(chatMessage) error
+	Generate([]db.Message) error
 }
 
 type chatGenerator struct {
-	apiKey  string
-	client  *http.Client
-	history []chatMessage
+	client *http.Client
+	apiKey string
 }
 
-func (c *chatGenerator) Generate(message chatMessage) error {
-	c.history = append(c.history, message)
+func (c *chatGenerator) Generate(msgs []db.Message) error {
+	reqData := chatRequest{
+		Model:    "gpt-3.5-turbo",
+		User:     "idk",
+		Messages: msgs,
+	}
 
-	//req := chatRequest{
-	//	Model:    "gpt-3.5-turbo",
-	//	User:     "idk",
-	//	Messages: c.history,
-	//}
-	//req, err := http.NewRequest(http.MethodPost)
-	//c.client.Do()
+	marshal, err := json.Marshal(reqData)
+	if err != nil {
+		return fmt.Errorf("cannot marshal open ai messages; %w", err)
+	}
+	req, err := http.NewRequest(http.MethodPost, openAiApiUrl, bytes.NewReader(marshal))
+	if err != nil {
+		return fmt.Errorf("cannot create new chat request; %w", err)
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", c.apiKey))
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("cannot send open ai request; %w", err)
+	}
+
+	all, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(all)
 
 	return nil
 }

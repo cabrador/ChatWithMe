@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"chatwithme/ai"
 	"chatwithme/db"
 	"encoding/json"
 	"fmt"
@@ -17,14 +18,16 @@ type messageReq struct {
 	OrderNumber int
 }
 
-func NewChatHandler(db *db.Database) ChatHandler {
+func NewChatHandler(db *db.Database, generator ai.ChatGenerator) ChatHandler {
 	return ChatHandler{
-		db: db,
+		db:        db,
+		generator: generator,
 	}
 }
 
 type ChatHandler struct {
-	db *db.Database
+	db        *db.Database
+	generator ai.ChatGenerator
 }
 
 func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
@@ -42,24 +45,34 @@ func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
 		c.Set("error", fmt.Errorf("cannot unmarshal message req; %w", err))
 		return echo.ErrBadRequest
 	}
-	str := req.PathValue("personaId")
+	str := c.Param("personaId")
 	personaId, err := strconv.Atoi(str)
 	if err != nil {
 		c.Set("error", fmt.Errorf("cannot convert personaId '%v from string to int; %w", str, err))
 		return echo.ErrBadRequest
 	}
 
-	_, err = h.db.GetUserPersonaMessages(r.UserId, personaId)
+	msgs, err := h.db.GetUserPersonaMessages(r.UserId, personaId)
 	if err != nil {
 		c.Set("error", fmt.Errorf("cannot GetUserPersonaMessages; %w", err))
 		return echo.ErrInternalServerError
 	}
 
-	_, err = h.db.InsertMessage(r.UserId, personaId, r.Content, r.OrderNumber)
+	msgs = append(msgs, db.Message{
+		Author:  "user",
+		Content: r.Content,
+	})
+
+	err = h.generator.Generate(msgs)
 	if err != nil {
-		c.Set("error", fmt.Errorf("cannot GetUserPersonaMessages; %w", err))
-		return echo.ErrInternalServerError
+		return err
 	}
+
+	//_, err = h.db.InsertMessage(r.UserId, personaId, r.Content, r.OrderNumber)
+	//if err != nil {
+	//	c.Set("error", fmt.Errorf("cannot GetUserPersonaMessages; %w", err))
+	//	return echo.ErrInternalServerError
+	//}
 
 	return nil
 }

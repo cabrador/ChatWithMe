@@ -1,5 +1,7 @@
 package ai
 
+import "chatwithme/db"
+
 type openAiRole string
 
 const (
@@ -7,13 +9,8 @@ const (
 	assistantRole openAiRole = "assistant"
 )
 
-type chatMessage struct {
-	Role    openAiRole
-	Content string
-}
-
 type chatRequest struct {
-	Model    string
-	User     string
-	Messages []chatMessage
+	Model    string       `json:"model"`
+	User     string       `json:"user"`
+	Messages []db.Message `json:"messages"`
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chatwithme/ai"
 	"chatwithme/db"
 	"chatwithme/handler"
 	"chatwithme/logger"
@@ -28,8 +29,8 @@ func main() {
 	app.Use(middleware.Logger(logger.NewLogger("DEBUG", "Logger Middleware")))
 	rootGroup := app.Group("/api/v1")
 	chatGroup := rootGroup.Group("/chat")
-	chatHandler := handler.NewChatHandler(db)
-	chatGroup.POST("", chatHandler.ChatPostHandler)
+	chatHandler := handler.NewChatHandler(db, ai.MakeChatGenerator())
+	chatGroup.POST("/:personaId", chatHandler.ChatPostHandler)
 
 	log.Fatal(app.Start(":3000"))
 }

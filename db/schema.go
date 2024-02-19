@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
 	username text
 );
+
+CREATE TABLE IF NOT EXISTS authors (
+    id SERIAL PRIMARY KEY,
+    author text
+);
     
 CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
@@ -32,7 +37,9 @@ CREATE TABLE IF NOT EXISTS messages (
     persona_id INT NOT NULL,
     content text,
     order_number INT,
+    author_id INT,
     CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id),
-    CONSTRAINT fk_persona FOREIGN KEY(persona_id) REFERENCES personas(id)
+    CONSTRAINT fk_persona FOREIGN KEY(persona_id) REFERENCES personas(id),
+    CONSTRAINT fk_author FOREIGN KEY(author_id) REFERENCES authors(id)
 );	
 `

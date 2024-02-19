@@ -37,9 +37,14 @@ func (db *Database) InsertMessage(userId, personaId int, content string, orderNu
 }
 
 const getMessages = `
-	SELECT * FROM messages WHERE user_id=$1 AND persona_id=$2
+	SELECT content, author 
+	FROM messages 
+	    INNER JOIN authors on authors.id = messages.author_id 
+	WHERE messages.user_id=$1 AND messages.persona_id=$2 ORDER BY messages.order_number
 `
 
-func (db *Database) GetUserPersonaMessages(userId, personaId int) (sql.Result, error) {
-	return db.db.Exec(getMessages, userId, personaId)
+func (db *Database) GetUserPersonaMessages(userId, personaId int) ([]Message, error) {
+	var msg []Message
+	err := db.db.Select(&msg, getMessages, userId, personaId)
+	return msg, err
 }
