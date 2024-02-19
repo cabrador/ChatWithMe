@@ -36,22 +36,3 @@ CREATE TABLE IF NOT EXISTS messages (
     CONSTRAINT fk_persona FOREIGN KEY(persona_id) REFERENCES personas(id)
 );	
 `
-
-type PersonalityTrait struct {
-	Trait string
-}
-
-type Persona struct {
-	FirstName         string `db:first_name`
-	LastName          string `db:last_name`
-	PersonalityTraits []PersonalityTrait
-}
-
-type User struct {
-	Username string
-}
-
-type Message struct {
-	Content     string
-	OrderNumber int
-}
