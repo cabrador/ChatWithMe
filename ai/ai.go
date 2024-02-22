@@ -14,6 +14,28 @@ const (
 	openAiApiUrl = "https://api.openai.com/v1/chat/completions"
 )
 
+type openAiResponse struct {
+	Id                string
+	Object            string
+	Created           uint64
+	Model             string
+	Choices           []openAiChoices
+	Usage             openAiUsage
+	SystemFingerprint string `json:"system_fingerprint"`
+}
+
+type openAiChoices struct {
+	Index        int
+	Message      db.Message
+	FinishReason string `json:"finish_reason"`
+}
+
+type openAiUsage struct {
+	PromptTokens     int `json:"prompt_tokens"`
+	CompletionTokens int `json:"completion_tokens"`
+	TotalTokens      int `json:"total_tokens"`
+}
+
 func MakeChatGenerator() ChatGenerator {
 	return &chatGenerator{
 		client: http.DefaultClient,
@@ -47,6 +69,7 @@ func (c *chatGenerator) Generate(msgs []db.Message) error {
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", c.apiKey))
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -58,7 +81,13 @@ func (c *chatGenerator) Generate(msgs []db.Message) error {
 		return err
 	}
 
-	fmt.Println(all)
+	var res openAiResponse
+	err = json.Unmarshal(all, &res)
+	if err != nil {
+		return fmt.Errorf("cannot unmarshal open ai response; %w", err)
+	}
+
+	fmt.Println(res)
 
 	return nil
 }
