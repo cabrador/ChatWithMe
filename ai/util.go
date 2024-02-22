@@ -1,6 +1,8 @@
 package ai
 
-import "chatwithme/db"
+import (
+	"chatwithme/types"
+)
 
 type openAiRole string
 
@@ -10,7 +12,7 @@ const (
 )
 
 type chatRequest struct {
-	Model    string       `json:"model"`
-	User     string       `json:"user"`
-	Messages []db.Message `json:"messages"`
+	Model    string          `json:"model"`
+	User     string          `json:"user"`
+	Messages []types.Message `json:"messages"`
 }

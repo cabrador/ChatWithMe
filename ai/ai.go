@@ -2,7 +2,7 @@ package ai
 
 import (
 	"bytes"
-	"chatwithme/db"
+	"chatwithme/types"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,7 +26,7 @@ type openAiResponse struct {
 
 type openAiChoices struct {
 	Index        int
-	Message      db.Message
+	Message      types.Message
 	FinishReason string `json:"finish_reason"`
 }
 
@@ -44,7 +44,7 @@ func MakeChatGenerator() ChatGenerator {
 }
 
 type ChatGenerator interface {
-	Generate([]db.Message) error
+	Generate([]types.Message) error
 }
 
 type chatGenerator struct {
@@ -52,7 +52,7 @@ type chatGenerator struct {
 	apiKey string
 }
 
-func (c *chatGenerator) Generate(msgs []db.Message) error {
+func (c *chatGenerator) Generate(msgs []types.Message) error {
 	reqData := chatRequest{
 		Model:    "gpt-3.5-turbo",
 		User:     "idk",

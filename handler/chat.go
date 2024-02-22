@@ -3,6 +3,7 @@ package handler
 import (
 	"chatwithme/ai"
 	"chatwithme/db"
+	"chatwithme/types"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -58,7 +59,7 @@ func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	msgs = append(msgs, db.Message{
+	msgs = append(msgs, types.Message{
 		Author:  "user",
 		Content: r.Content,
 	})
