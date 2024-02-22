@@ -29,7 +29,7 @@ func main() {
 	app.Use(middleware.Logger(logger.NewLogger("DEBUG", "Logger Middleware")))
 	rootGroup := app.Group("/api/v1")
 	chatGroup := rootGroup.Group("/chat")
-	chatHandler := handler.NewChatHandler(db, ai.MakeChatGenerator())
+	chatHandler := handler.NewChatHandler(ai.MakeChatGenerator(db))
 	chatGroup.POST("/:personaId", chatHandler.ChatPostHandler)
 
 	log.Fatal(app.Start(":3000"))

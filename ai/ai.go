@@ -2,6 +2,7 @@ package ai
 
 import (
 	"bytes"
+	"chatwithme/db"
 	"chatwithme/types"
 	"encoding/json"
 	"fmt"
@@ -36,23 +37,34 @@ type openAiUsage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-func MakeChatGenerator() ChatGenerator {
+func MakeChatGenerator(db *db.Database) ChatGenerator {
 	return &chatGenerator{
 		client: http.DefaultClient,
 		apiKey: os.Getenv("OPENAI_API_TOKEN"),
+		db:     db,
 	}
 }
 
 type ChatGenerator interface {
-	Generate([]types.Message) error
+	Generate(userId, personaId int, content string) ([]types.Message, error)
 }
 
 type chatGenerator struct {
 	client *http.Client
 	apiKey string
+	db     *db.Database
 }
 
-func (c *chatGenerator) Generate(msgs []types.Message) error {
+func (c *chatGenerator) Generate(userId, personaId int, content string) ([]types.Message, error) {
+	msgs, err := c.db.GetUserPersonaMessages(userId, personaId)
+	if err != nil {
+		return nil, fmt.Errorf("cannot GetUserPersonaMessages; %w", err)
+	}
+
+	msgs = append(msgs, types.Message{
+		Author:  "user",
+		Content: content,
+	})
 	reqData := chatRequest{
 		Model:    "gpt-3.5-turbo",
 		User:     "idk",
@@ -61,11 +73,11 @@ func (c *chatGenerator) Generate(msgs []types.Message) error {
 
 	marshal, err := json.Marshal(reqData)
 	if err != nil {
-		return fmt.Errorf("cannot marshal open ai messages; %w", err)
+		return nil, fmt.Errorf("cannot marshal open ai messages; %w", err)
 	}
 	req, err := http.NewRequest(http.MethodPost, openAiApiUrl, bytes.NewReader(marshal))
 	if err != nil {
-		return fmt.Errorf("cannot create new chat request; %w", err)
+		return nil, fmt.Errorf("cannot create new chat request; %w", err)
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", c.apiKey))
@@ -73,21 +85,21 @@ func (c *chatGenerator) Generate(msgs []types.Message) error {
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("cannot send open ai request; %w", err)
+		return nil, fmt.Errorf("cannot send open ai request; %w", err)
 	}
 
 	all, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("cannot send open ai request; %w", err)
 	}
 
-	var res openAiResponse
+	var res *openAiResponse
 	err = json.Unmarshal(all, &res)
 	if err != nil {
-		return fmt.Errorf("cannot unmarshal open ai response; %w", err)
+		return nil, fmt.Errorf("cannot unmarshal open ai response; %w", err)
 	}
 
-	fmt.Println(res)
+	msgs = append(msgs, res.Choices[0].Message)
 
-	return nil
+	return msgs, nil
 }

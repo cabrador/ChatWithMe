@@ -2,8 +2,6 @@ package handler
 
 import (
 	"chatwithme/ai"
-	"chatwithme/db"
-	"chatwithme/types"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -19,15 +17,13 @@ type messageReq struct {
 	OrderNumber int
 }
 
-func NewChatHandler(db *db.Database, generator ai.ChatGenerator) ChatHandler {
+func NewChatHandler(generator ai.ChatGenerator) ChatHandler {
 	return ChatHandler{
-		db:        db,
 		generator: generator,
 	}
 }
 
 type ChatHandler struct {
-	db        *db.Database
 	generator ai.ChatGenerator
 }
 
@@ -53,20 +49,11 @@ func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	msgs, err := h.db.GetUserPersonaMessages(r.UserId, personaId)
+	_, err = h.generator.Generate(r.UserId, personaId, r.Content)
 	if err != nil {
-		c.Set("error", fmt.Errorf("cannot GetUserPersonaMessages; %w", err))
+		c.Set("error", fmt.Errorf("cannot generate chat; %w", err))
+		c.Set("code", http.StatusInternalServerError)
 		return echo.ErrInternalServerError
-	}
-
-	msgs = append(msgs, types.Message{
-		Author:  "user",
-		Content: r.Content,
-	})
-
-	err = h.generator.Generate(msgs)
-	if err != nil {
-		return err
 	}
 
 	//_, err = h.db.InsertMessage(r.UserId, personaId, r.Content, r.OrderNumber)
