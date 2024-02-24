@@ -49,18 +49,19 @@ func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	_, err = h.generator.Generate(r.UserId, personaId, r.Content)
+	msgs, err := h.generator.Generate(r.UserId, personaId, r.Content)
 	if err != nil {
 		c.Set("error", fmt.Errorf("cannot generate chat; %w", err))
 		c.Set("code", http.StatusInternalServerError)
 		return echo.ErrInternalServerError
 	}
 
-	//_, err = h.db.InsertMessage(r.UserId, personaId, r.Content, r.OrderNumber)
-	//if err != nil {
-	//	c.Set("error", fmt.Errorf("cannot GetUserPersonaMessages; %w", err))
-	//	return echo.ErrInternalServerError
-	//}
+	err = c.JSON(http.StatusOK, msgs)
+	if err != nil {
+		c.Set("error", fmt.Errorf("cannot create json response; %w", err))
+		c.Set("code", http.StatusInternalServerError)
+		return echo.ErrInternalServerError
+	}
 
 	return nil
 }

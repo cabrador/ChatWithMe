@@ -10,7 +10,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const ssl = "disabled"
+const (
+	ssl               = "disabled"
+	UserAuthorId      = 1
+	AssistantAuthorId = 2
+)
 
 func MakeDb() (*Database, error) {
 	db, err := sqlx.Connect("postgres", os.Getenv("DB_DSN"))
@@ -29,16 +33,16 @@ type Database struct {
 }
 
 const insertMessage = `
-	INSERT INTO messages(user_id, persona_id, content, order_number)
-	VALUES ($1, $2, $3, $4);
+	INSERT INTO messages(user_id, persona_id, content, order_number, author_id)
+	VALUES (:user_id, :persona_id, :content, :order_number, :author_id);
 `
 
-func (db *Database) InsertMessage(userId, personaId int, content string, orderNumber int) (sql.Result, error) {
-	return db.db.Exec(insertMessage, userId, personaId, content, orderNumber)
+func (db *Database) InsertMessages(msgs []types.Message) (sql.Result, error) {
+	return db.db.NamedExec(insertMessage, msgs)
 }
 
 const getMessages = `
-	SELECT content, author 
+	SELECT user_id, persona_id, content, author, order_number
 	FROM messages 
 	    INNER JOIN authors on authors.id = messages.author_id 
 	WHERE messages.user_id=$1 AND messages.persona_id=$2 ORDER BY messages.order_number

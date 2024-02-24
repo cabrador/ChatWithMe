@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 const (
@@ -61,15 +62,20 @@ func (c *chatGenerator) Generate(userId, personaId int, content string) ([]types
 		return nil, fmt.Errorf("cannot GetUserPersonaMessages; %w", err)
 	}
 
-	msgs = append(msgs, types.Message{
-		Author:  "user",
-		Content: content,
-	})
-	reqData := chatRequest{
-		Model:    "gpt-3.5-turbo",
-		User:     "idk",
-		Messages: msgs,
+	userMsg := types.Message{
+		Author:      userRole,
+		AuthorId:    db.UserAuthorId,
+		Content:     content,
+		UserId:      userId,
+		PersonaId:   personaId,
+		OrderNumber: len(msgs) + 1, // +1 because if one message is stored, this one is second
 	}
+
+	msgs = append(msgs, userMsg)
+	reqData := newRequestData(msgs)
+
+	// add rest of the data
+	// this needs to be done here because OpenAi api does not allow additional data
 
 	marshal, err := json.Marshal(reqData)
 	if err != nil {
@@ -99,7 +105,35 @@ func (c *chatGenerator) Generate(userId, personaId int, content string) ([]types
 		return nil, fmt.Errorf("cannot unmarshal open ai response; %w", err)
 	}
 
-	msgs = append(msgs, res.Choices[0].Message)
+	generatedMsg := res.Choices[0].Message
+	generatedMsg.Author = assistantRole
+	generatedMsg.AuthorId = db.AssistantAuthorId
+	generatedMsg.UserId = userId
+	generatedMsg.PersonaId = personaId
+	generatedMsg.OrderNumber = len(msgs) + 1 // +1 because we already appended users msg
 
-	return msgs, nil
+	msgsToInsert := []types.Message{userMsg, generatedMsg}
+	_, err = c.db.InsertMessages(msgsToInsert)
+	if err != nil {
+		return nil, fmt.Errorf("cannot GetUserPersonaMessages; %w", err)
+	}
+
+	return append(msgs, generatedMsg), nil
+}
+
+func newRequestData(msgs []types.Message) chatRequest {
+	var reqMsgs []openAiMessage
+
+	for _, m := range msgs {
+		reqMsgs = append(reqMsgs, openAiMessage{
+			Role:    m.Author,
+			Content: m.Content,
+		})
+	}
+
+	return chatRequest{
+		Model:    "gpt-3.5-turbo",
+		User:     strconv.FormatInt(int64(msgs[0].UserId), 10),
+		Messages: reqMsgs,
+	}
 }

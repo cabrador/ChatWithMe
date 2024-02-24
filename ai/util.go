@@ -1,18 +1,17 @@
 package ai
 
-import (
-	"chatwithme/types"
-)
-
-type openAiRole string
-
 const (
-	userRole      openAiRole = "user"
-	assistantRole openAiRole = "assistant"
+	userRole      = "user"
+	assistantRole = "assistant"
 )
 
 type chatRequest struct {
 	Model    string          `json:"model"`
 	User     string          `json:"user"`
-	Messages []types.Message `json:"messages"`
+	Messages []openAiMessage `json:"messages"`
+}
+
+type openAiMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
