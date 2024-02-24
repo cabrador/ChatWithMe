@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/a-h/templ v0.2.543 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"chatwithme/ai"
+	"chatwithme/views"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -66,6 +67,6 @@ func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
 	return nil
 }
 
-func (h *ChatHandler) ChatGetHandler(rw http.ResponseWriter, req *http.Request) {
-	http.Error(rw, "not yet implemented", http.StatusServiceUnavailable)
+func (h *ChatHandler) ChatGetHandler(c echo.Context) error {
+	return views.Hello("world").Render(c.Request().Context(), c.Response().Writer)
 }

@@ -31,6 +31,7 @@ func main() {
 	chatGroup := rootGroup.Group("/chat")
 	chatHandler := handler.NewChatHandler(ai.MakeChatGenerator(db))
 	chatGroup.POST("/:personaId", chatHandler.ChatPostHandler)
+	chatGroup.GET("", chatHandler.ChatGetHandler)
 
 	log.Fatal(app.Start(":3000"))
 }
