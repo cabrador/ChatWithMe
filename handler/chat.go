@@ -68,5 +68,5 @@ func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
 }
 
 func (h *ChatHandler) ChatGetHandler(c echo.Context) error {
-	return views.Hello("world").Render(c.Request().Context(), c.Response().Writer)
+	return views.Render(c, views.Hello("world"))
 }
