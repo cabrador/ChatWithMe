@@ -1,10 +1,11 @@
 package db
 
 import (
-	"chatwithme/types"
 	"database/sql"
 	"fmt"
 	"os"
+
+	"github.com/petr-hanzl/chatwithme/types"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"

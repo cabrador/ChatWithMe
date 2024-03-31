@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"chatwithme/logger"
+	"github.com/petr-hanzl/chatwithme/logger"
 
 	"github.com/labstack/echo/v4"
 )

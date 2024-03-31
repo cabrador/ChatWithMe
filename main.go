@@ -1,13 +1,14 @@
 package main
 
 import (
-	"chatwithme/ai"
-	"chatwithme/db"
-	"chatwithme/handler"
-	"chatwithme/logger"
-	"chatwithme/middleware"
 	"log"
 	"os"
+
+	"github.com/petr-hanzl/chatwithme/ai"
+	"github.com/petr-hanzl/chatwithme/db"
+	"github.com/petr-hanzl/chatwithme/handler"
+	"github.com/petr-hanzl/chatwithme/logger"
+	"github.com/petr-hanzl/chatwithme/middleware"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"

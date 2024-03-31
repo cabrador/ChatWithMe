@@ -2,14 +2,15 @@ package ai
 
 import (
 	"bytes"
-	"chatwithme/db"
-	"chatwithme/types"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/petr-hanzl/chatwithme/db"
+	"github.com/petr-hanzl/chatwithme/types"
 )
 
 const (

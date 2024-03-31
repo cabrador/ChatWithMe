@@ -1,13 +1,14 @@
 package handler
 
 import (
-	"chatwithme/ai"
-	"chatwithme/views"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/petr-hanzl/chatwithme/ai"
+	"github.com/petr-hanzl/chatwithme/views"
 
 	"github.com/labstack/echo/v4"
 )
