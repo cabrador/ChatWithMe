@@ -17,6 +17,8 @@ const (
 	AssistantAuthorId = 2
 )
 
+// test
+
 func MakeDb() (*Database, error) {
 	db, err := sqlx.Connect("postgres", os.Getenv("DB_DSN"))
 	if err != nil {
