@@ -19,7 +19,9 @@ type ChatController interface {
 	// Generate sends the given message to OpenAI chat.
 	// If there were any messages sent before, they
 	// are retrieved from the database.
-	Generate(userId, personaId int, content string) ([]types.Message, error)
+	Generate(userId, personaId int, content string) (types.Messages, error)
+
+	GetUserPersonaMessages(userId, personaId int) ([]types.Message, error)
 }
 
 type chatController struct {
@@ -29,7 +31,11 @@ type chatController struct {
 	generator *ai.Generator
 }
 
-func (c *chatController) Generate(userId, personaId int, content string) ([]types.Message, error) {
+func (c *chatController) GetUserPersonaMessages(userId, personaId int) ([]types.Message, error) {
+	return c.db.GetUserPersonaMessages(userId, personaId)
+}
+
+func (c *chatController) Generate(userId, personaId int, content string) (types.Messages, error) {
 	msgs, err := c.db.GetUserPersonaMessages(userId, personaId)
 	if err != nil {
 		return nil, fmt.Errorf("cannot GetUserPersonaMessages; %w", err)
