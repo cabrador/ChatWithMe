@@ -7,10 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/petr-hanzl/chatwithme/ai"
-	"github.com/petr-hanzl/chatwithme/views"
-
 	"github.com/labstack/echo/v4"
+	"github.com/petr-hanzl/chatwithme/db"
+	"github.com/petr-hanzl/chatwithme/views"
 )
 
 type messageReq struct {
@@ -19,17 +18,17 @@ type messageReq struct {
 	OrderNumber int
 }
 
-func NewChatHandler(generator ai.ChatGenerator) ChatHandler {
+func NewChatHandler(controller db.ChatController) ChatHandler {
 	return ChatHandler{
-		generator: generator,
+		ctrl: controller,
 	}
 }
 
 type ChatHandler struct {
-	generator ai.ChatGenerator
+	ctrl db.ChatController
 }
 
-func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
+func (h *ChatHandler) PersonaPostHandler(c echo.Context) error {
 	req := c.Request()
 
 	data, err := io.ReadAll(req.Body)
@@ -47,11 +46,11 @@ func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
 	str := c.Param("personaId")
 	personaId, err := strconv.Atoi(str)
 	if err != nil {
-		c.Set("error", fmt.Errorf("cannot convert personaId '%v from string to int; %w", str, err))
+		c.Set("error", fmt.Errorf("cannot convert personaId '%v' from string to int; %w", str, err))
 		return echo.ErrBadRequest
 	}
 
-	msgs, err := h.generator.Generate(r.UserId, personaId, r.Content)
+	msgs, err := h.ctrl.Generate(r.UserId, personaId, r.Content)
 	if err != nil {
 		c.Set("error", fmt.Errorf("cannot generate chat; %w", err))
 		c.Set("code", http.StatusInternalServerError)
@@ -68,6 +67,12 @@ func (h *ChatHandler) ChatPostHandler(c echo.Context) error {
 	return nil
 }
 
+func (h *ChatHandler) PersonaGetHandler(c echo.Context) error {
+	// todo controller
+
+	return views.Render(c, views.Persona(c.Param("personaId")))
+}
+
 func (h *ChatHandler) ChatGetHandler(c echo.Context) error {
-	return views.Render(c, views.Hello("world"))
+	return views.Render(c, views.ChatHome())
 }

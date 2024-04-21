@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/petr-hanzl/chatwithme/ai"
 	"github.com/petr-hanzl/chatwithme/db"
 	"github.com/petr-hanzl/chatwithme/handler"
 	"github.com/petr-hanzl/chatwithme/logger"
@@ -21,18 +20,27 @@ func main() {
 	}
 	os.Getenv("OPENAI_API_TOKEN")
 
-	db, err := db.MakeDb()
+	database, err := db.MakeDb()
 	if err != nil {
 		panic(err)
 	}
 
 	app := echo.New()
 	app.Use(middleware.Logger(logger.NewLogger("DEBUG", "Logger Middleware")))
-	rootGroup := app.Group("/api/v1")
-	chatGroup := rootGroup.Group("/chat")
-	chatHandler := handler.NewChatHandler(ai.MakeChatGenerator(db))
-	chatGroup.POST("/:personaId", chatHandler.ChatPostHandler)
+
+	app.GET("", handler.HomeHandler{}.HomeGetHandler)
+
+	chatHandler := handler.NewChatHandler(db.MakeChatController(database))
+
+	// API
+	apiGroup := app.Group("/api/v1")
+	chatGroup := apiGroup.Group("/chat")
+	chatGroup.POST("/:personaId", chatHandler.PersonaPostHandler)
 	chatGroup.GET("", chatHandler.ChatGetHandler)
+
+	// FE
+	renderGroup := app.Group("/chat")
+	renderGroup.GET("/:personaId", chatHandler.PersonaGetHandler)
 
 	log.Fatal(app.Start(":3000"))
 }

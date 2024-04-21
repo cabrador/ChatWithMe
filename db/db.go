@@ -12,9 +12,7 @@ import (
 )
 
 const (
-	ssl               = "disabled"
-	UserAuthorId      = 1
-	AssistantAuthorId = 2
+	ssl = "disabled"
 )
 
 // test
