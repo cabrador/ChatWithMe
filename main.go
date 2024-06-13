@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/petr-hanzl/chatwithme/db"
-	"github.com/petr-hanzl/chatwithme/handler"
-	"github.com/petr-hanzl/chatwithme/logger"
-	"github.com/petr-hanzl/chatwithme/middleware"
+	"github.com/petr-hanzl/chatwithme/internal/db"
+	"github.com/petr-hanzl/chatwithme/internal/handler"
+	"github.com/petr-hanzl/chatwithme/internal/logger"
+	"github.com/petr-hanzl/chatwithme/internal/middleware"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
