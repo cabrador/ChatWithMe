@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/petr-hanzl/chatwithme/ai"
-	"github.com/petr-hanzl/chatwithme/types"
+	"github.com/petr-hanzl/chatwithme/internal/ai"
+	"github.com/petr-hanzl/chatwithme/internal/types"
 )
 
 func MakeChatController(db *Database) ChatController {

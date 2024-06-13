@@ -9,7 +9,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/petr-hanzl/chatwithme/types"
+	"github.com/petr-hanzl/chatwithme/internal/types"
 )
 
 const (

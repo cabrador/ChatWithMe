@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/petr-hanzl/chatwithme/views"
+	"github.com/petr-hanzl/chatwithme/internal/views"
 )
 
 type HomeHandler struct{}

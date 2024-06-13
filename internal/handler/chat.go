@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/petr-hanzl/chatwithme/db"
-	"github.com/petr-hanzl/chatwithme/views"
+	"github.com/petr-hanzl/chatwithme/internal/db"
+	"github.com/petr-hanzl/chatwithme/internal/views"
 )
 
 type messageReq struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/petr-hanzl/chatwithme/types"
+	"github.com/petr-hanzl/chatwithme/internal/types"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
