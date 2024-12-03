@@ -28,19 +28,12 @@ func main() {
 	app := echo.New()
 	app.Use(middleware.Logger(logger.NewLogger("DEBUG", "Logger Middleware")))
 
-	app.GET("", handler.HomeHandler{}.HomeGetHandler)
-
 	chatHandler := handler.NewChatHandler(db.MakeChatController(database))
 
 	// API
 	apiGroup := app.Group("/api/v1")
 	chatGroup := apiGroup.Group("/chat")
 	chatGroup.POST("/:personaId", chatHandler.PersonaPostHandler)
-	chatGroup.GET("", chatHandler.ChatGetHandler)
 
-	// FE
-	renderGroup := app.Group("/chat")
-	renderGroup.GET("/:personaId", chatHandler.PersonaGetHandler)
-
-	log.Fatal(app.Start(":3000"))
+	log.Fatal(app.Start(":4000"))
 }

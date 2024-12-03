@@ -41,6 +41,10 @@ func (c *chatController) Generate(userId, personaId int, content string) (types.
 		return nil, fmt.Errorf("cannot GetUserPersonaMessages; %w", err)
 	}
 
+	if msgs == nil {
+		msgs = []types.Message{}
+	}
+
 	userMsg := types.Message{
 		Author:      ai.UserRole,
 		AuthorId:    ai.UserAuthorId,
@@ -49,16 +53,18 @@ func (c *chatController) Generate(userId, personaId int, content string) (types.
 		PersonaId:   personaId,
 		OrderNumber: len(msgs) + 1, // +1 because if one message is stored, this one is second
 	}
-	aiAnswer, err := c.generator.Generate(msgs, userId, personaId)
+	msgs = append(msgs, userMsg)
+
+	aiMsg, err := c.generator.Generate(msgs, userId, personaId)
 	if err != nil {
 		return nil, err
 	}
 
-	msgsToInsert := []types.Message{userMsg, aiAnswer}
-	_, err = c.db.InsertMessages(msgsToInsert)
+	// Only insert newly created messsages
+	_, err = c.db.InsertMessages([]types.Message{userMsg, aiMsg})
 	if err != nil {
 		return nil, fmt.Errorf("cannot GetUserPersonaMessages; %w", err)
 	}
 
-	return append(msgs, msgsToInsert...), nil
+	return append(msgs, aiMsg), nil
 }

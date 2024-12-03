@@ -1,6 +1,8 @@
 package db
 
 const schema = `
+SET search_path TO public;
+
 CREATE TABLE IF NOT EXISTS personality_traits (
     id SERIAL PRIMARY KEY,
 	trait text  

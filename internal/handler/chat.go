@@ -1,19 +1,19 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/petr-hanzl/chatwithme/internal/db"
-	"github.com/petr-hanzl/chatwithme/internal/views"
 )
 
-type messageReq struct {
-	UserId      int
-	Content     string
-	OrderNumber int
+type MessageReq struct {
+	UserId  int
+	Content string
 }
 
 func NewChatHandler(controller db.ChatController) ChatHandler {
@@ -28,8 +28,20 @@ type ChatHandler struct {
 
 func (h *ChatHandler) PersonaPostHandler(c echo.Context) error {
 	// todo get userid from context
-	userId := 1
-	content := c.FormValue("content")
+	body, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		c.Set("error", fmt.Errorf("cannot read request body; %w", err))
+		c.Set("code", http.StatusInternalServerError)
+		return echo.ErrInternalServerError
+	}
+
+	var req MessageReq
+	err = json.Unmarshal(body, &req)
+	if err != nil || req.UserId == 0 || req.Content == "" {
+		c.Set("error", fmt.Errorf("incorrect request body; %w", err))
+		return echo.ErrBadRequest
+	}
+
 	strPID := c.Param("personaId")
 	personaId, err := strconv.Atoi(strPID)
 	if err != nil {
@@ -37,7 +49,7 @@ func (h *ChatHandler) PersonaPostHandler(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	msgs, err := h.ctrl.Generate(userId, personaId, content)
+	msgs, err := h.ctrl.Generate(req.UserId, personaId, req.Content)
 	if err != nil {
 		c.Set("error", fmt.Errorf("cannot generate chat; %w", err))
 		c.Set("code", http.StatusInternalServerError)
@@ -52,27 +64,4 @@ func (h *ChatHandler) PersonaPostHandler(c echo.Context) error {
 	}
 
 	return nil
-}
-
-func (h *ChatHandler) PersonaGetHandler(c echo.Context) error {
-	// todo get userid from context
-	str := c.Param("personaId")
-	personaId, err := strconv.Atoi(str)
-	if err != nil {
-		c.Set("error", fmt.Errorf("cannot convert personaId '%v' from string to int; %w", str, err))
-		return echo.ErrBadRequest
-	}
-
-	msgs, err := h.ctrl.GetUserPersonaMessages(1, personaId)
-	if err != nil {
-		c.Set("error", err)
-		c.Set("code", http.StatusInternalServerError)
-		return echo.ErrInternalServerError
-	}
-
-	return views.Render(c, views.Persona(c.Param("personaId"), msgs))
-}
-
-func (h *ChatHandler) ChatGetHandler(c echo.Context) error {
-	return views.Render(c, views.ChatHome())
 }
